@@ -89,12 +89,17 @@ jobs:
           path: ${{ env.EXE }}
 
   Pikafish-Android:
-    name: Android-arm64-universal
+    name: Android-${{ matrix.arch }}-universal
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch:
+          - arm64
+          - x86-64
     env:
-      ARCH: arm64-universal
+      ARCH: ${{ matrix.arch }}-universal
       COMP: ndk
-      EXE: Pikafish-Android-arm64-universal
+      EXE: Pikafish-Android-${{ matrix.arch }}-universal
       LDFLAGS: "-static -Wno-unused-command-line-argument"
     defaults:
       run:
