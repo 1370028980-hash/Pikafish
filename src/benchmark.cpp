@@ -415,8 +415,6 @@ std::vector<std::string> setup_bench(const std::string& currentFen, std::istream
         while (getline(file, fen))
             if (!fen.empty())
                 fens.push_back(fen);
-
-        file.close();
     }
 
     list.emplace_back("setoption name Threads value " + threads);
@@ -516,4 +514,4 @@ BenchmarkSetup setup_benchmark(std::istream& is) {
     return setup;
 }
 
-}  // namespace Stockfish
+}  // namespace Stockfish::Benchmark
