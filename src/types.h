@@ -434,10 +434,10 @@ class Move {
 // victim being chased by a different attacker is not confused with a continued
 // chase by the original attacker. This is critical for correctly handling
 // "rooted perpetual chase" (带根长捉) situations.
-// Shared by AsianRule, SkyRule and YitianRule for accurate "常捉无根子" detection,
+// Shared by AsianRule, SkyRule and YitianRule for accurate "长捉无根子" detection,
 // without affecting each rule's own scoring system.
 union ChaseMap {
-    u64 attacks[4] {};
+    u64 attacks[4]{};
     u16 victims[16];
 
     // For adding victim <- attacker pair (encoded via make_chase)

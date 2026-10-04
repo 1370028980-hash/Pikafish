@@ -30,6 +30,7 @@
 #include <sstream>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include "attacks.h"
 #include "bitboard.h"
@@ -48,13 +49,15 @@ namespace Stockfish {
 using namespace Attacks;
 
 namespace RuleConfig {
-// Defaults: SkyRule with rule120, Sixty Move Rule off.
-// AsianRule and SkyRule default to rule120 (enforced in engine.cpp couplings).
-RepetitionRule repetitionRule  = RepetitionRule::SKY;
+// Defaults: YitianRule with rule150, Sixty Move Rule on.
+// AsianRule/SkyRule couple to rule120 and YitianRule couples to rule150;
+// the Sixty Move Rule stays on for all three (enforced in engine.cpp
+// couplings).
+RepetitionRule repetitionRule  = RepetitionRule::YITIAN;
 DrawRule       drawRule        = DrawRule::NONE;
 int            mateThreatDepth = 10;
 bool           sixtyMoveRule   = true;
-int            rule60MaxPly    = 120;
+int            rule60MaxPly    = 150;
 }  // namespace RuleConfig
 
 namespace Zobrist {
@@ -208,6 +211,7 @@ std::optional<PositionSetError> Position::set(const string& fenStr, StateInfo* s
 
     if (rank != RANK_0 || file != FILE_NB)
         return PositionSetError("Invalid FEN. Board state encoding ended but cursor not at end.");
+
     if (count<KING>(WHITE) != 1 || count<KING>(BLACK) != 1)
         return PositionSetError("Unsupported position. Incorrect number of kings.");
 
@@ -1141,10 +1145,7 @@ void Position::undo_move(Move m, Piece captured, int id) {
 }
 
 
-// Tests whether a pseudo-legal move is chase legal.
-// The extra bitboard b masks out checkers that should be ignored (e.g. the
-// pre-existing checkers on our own king), so that we only flag moves that
-// create NEW attacks on the king. Ported from the "perfect Asian rule" reference.
+// Tests whether a pseudo-legal move is chase legal
 bool Position::chase_legal(Move m, Bitboard b) const {
 
     assert(m.is_ok());
@@ -1906,8 +1907,9 @@ bool Position::rule_judge(Value& result, int ply) {
         }
     }
 
-    // Configurable natural-move rule. Selecting YitianRule turns this off in the UCI callback,
-    // matching the target binary.
+    // Configurable natural-move rule. The Repetition Rule callback keeps this
+    // switched on for AsianRule/SkyRule/YitianRule with rule120/rule120/
+    // rule150 respectively.
     if (RuleConfig::sixtyMoveRule && RuleConfig::rule60MaxPly > 0
         && st->rule60 >= RuleConfig::rule60MaxPly)
     {
